@@ -508,7 +508,17 @@ async function showInterfaceMenu(latestVersion) {
     serverUrl = `http://${displayHost}:${port}`;
   }
 
-  const subtitle = `🚀 Server: \x1b[32m${serverUrl}\x1b[0m`;
+  let subtitle = `🚀 Server: \x1b[32m${serverUrl}\x1b[0m`;
+
+  try {
+    const buildInfoPath = path.join(__dirname, "build-info.json");
+    if (fs.existsSync(buildInfoPath)) {
+      const buildInfo = JSON.parse(fs.readFileSync(buildInfoPath, "utf8"));
+      if (buildInfo.buildTime) {
+        subtitle += `\n  🛠️  Build: \x1b[36m${buildInfo.buildTime}\x1b[0m`;
+      }
+    }
+  } catch (e) {}
 
   const menuItems = [];
 

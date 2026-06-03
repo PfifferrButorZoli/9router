@@ -257,6 +257,15 @@ try {
   process.exit(1);
 }
 
+// Step 8b: Write build info
+console.log("8️⃣ b Writing build info...");
+const pad = (n) => String(n).padStart(2, "0");
+const now = new Date();
+const formattedDate = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+const buildInfoPath = path.join(cliDir, "build-info.json");
+fs.writeFileSync(buildInfoPath, JSON.stringify({ buildTime: formattedDate }, null, 2) + "\n");
+console.log("✅ Build info written\n");
+
 console.log("✨ CLI package build completed!");
 console.log(`📁 Output: ${cliAppDir}`);
 
