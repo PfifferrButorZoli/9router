@@ -184,7 +184,7 @@ export function createDisconnectAwareStream(transformStream, streamController, o
  * @param {TransformStream} transformStream - Transform stream for SSE
  * @param {object} streamController - Stream controller from createStreamController
  */
-export function pipeWithDisconnect(providerResponse, transformStream, streamController, onAbortTerminal = null) {
+export function pipeWithDisconnect(providerResponse, transformStream, streamController, onAbortTerminal = null, stallTimeoutMs = STREAM_STALL_TIMEOUT_MS) {
   let stallTimer = null;
   let chunkCount = 0;
   let totalBytes = 0;
@@ -197,7 +197,7 @@ export function pipeWithDisconnect(providerResponse, transformStream, streamCont
   // Generous TTFT timeout while the prompt prefills, then the stall timeout.
   const armStall = () => {
     clearStall();
-    const timeout = chunkCount === 0 ? STREAM_FIRST_CHUNK_TIMEOUT_MS : STREAM_STALL_TIMEOUT_MS;
+    const timeout = chunkCount === 0 ? STREAM_FIRST_CHUNK_TIMEOUT_MS : stallTimeoutMs;
     stallTimer = setTimeout(() => {
       stallTimer = null;
       const phase = chunkCount === 0 ? "first-chunk timeout" : "stall timeout";
@@ -221,7 +221,7 @@ export function pipeWithDisconnect(providerResponse, transformStream, streamCont
   };
 
   armStall();
-  dbg(tag, `pipe start | firstChunkTimeout=${STREAM_FIRST_CHUNK_TIMEOUT_MS}ms | stallTimeout=${STREAM_STALL_TIMEOUT_MS}ms`);
+  dbg(tag, `pipe start | firstChunkTimeout=${STREAM_FIRST_CHUNK_TIMEOUT_MS}ms | stallTimeout=${stallTimeoutMs}ms`);
 
   const upstreamTap = new TransformStream({
     transform(chunk, controller) {
