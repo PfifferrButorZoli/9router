@@ -125,7 +125,19 @@ try {
 // Step 2: Clean old app/cli/app if exists
 console.log("2️⃣  Cleaning old app/cli/app...");
 if (fs.existsSync(cliAppDir)) {
-  fs.rmSync(cliAppDir, { recursive: true, force: true });
+  try {
+    fs.rmSync(cliAppDir, { recursive: true, force: true });
+  } catch (err) {
+    if (err.code === 'EPERM' || err.code === 'EBUSY') {
+      console.warn(`⚠️  Failed to delete cli/app folder directly (${err.code}). Cleaning contents instead...`);
+      const files = fs.readdirSync(cliAppDir);
+      for (const file of files) {
+        fs.rmSync(path.join(cliAppDir, file), { recursive: true, force: true });
+      }
+    } else {
+      throw err;
+    }
+  }
 }
 console.log("✅ Cleaned\n");
 
